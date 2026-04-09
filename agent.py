@@ -1,8 +1,13 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.caches import InMemoryCache
+from langchain_core.globals import set_llm_cache
 from config import GOOGLE_API_KEY, MODEL, TEMPERATURE
 from prompts import SYSTEM_PROMPT
 from tools import escalate_to_human
+
+# Enable caching to reduce API calls and avoid RESOURCE_EXHAUSTED errors
+set_llm_cache(InMemoryCache())
 
 def build_agent():
     # 1. Configuração do modelo

@@ -1,6 +1,29 @@
+# Chaves de API e Configurações (CRÍTICO)
 .env
+
+# Banco de Dados Local
+chat_history.db
+
+# Python (Compilados e Cache)
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+
+# Ambientes Virtuais
 .venv/
 venv/
+env/
+
+# Ferramentas de Teste
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Configurações de Editor / IDE
+.vscode/
+.claude/
+settings.local.json
+
+# Logs
+*.log

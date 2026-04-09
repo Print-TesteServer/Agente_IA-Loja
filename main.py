@@ -1,4 +1,7 @@
 import logging
+import sqlite3
+import datetime
+from pathlib import Path
 from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 from agent import build_agent
 from tools import escalate_to_human
@@ -8,6 +11,44 @@ from tools import escalate_to_human
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger("LojaIA")
+
+# 2. Configuração de Persistência com SQLite
+DB_PATH = Path("chat_history.db")
+
+def init_database():
+    """Inicializa o banco de dados SQLite para persistência de histórico"""
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS chat_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_id TEXT NOT NULL,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                user_message TEXT NOT NULL,
+                ai_response TEXT NOT NULL
+            )
+        """)
+        conn.commit()
+
+def save_to_history(session_id: str, user_message: str, ai_response: str):
+    """Salva uma troca de mensagens no histórico"""
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute(
+            "INSERT INTO chat_history (session_id, user_message, ai_response) VALUES (?, ?, ?)",
+            (session_id, user_message, ai_response)
+        )
+        conn.commit()
+
+def load_history(session_id: str, limit: int = 10):
+    """Carrega o histórico recente de uma sessão"""
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.execute(
+            """SELECT user_message, ai_response FROM chat_history
+               WHERE session_id = ?
+               ORDER BY timestamp DESC
+               LIMIT ?""",
+            (session_id, limit)
+        )
+        return cursor.fetchall()
 
 def _format_ai_response(content):
     """
@@ -29,11 +70,21 @@ def main():
     print("=== Assistente Virtual da Loja (Lia) ===")
     print("Digite 'sair' para encerrar.\n")
 
+    # Inicializa o banco de dados
+    init_database()
+
+    # Gera um ID de sessão simples baseado na data/hora atual
+    session_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+
     # Inicializa o agente configurado no agent.py
     agent = build_agent()
-    
-    # Melhoria: Memória Persistente (Simulada via lista para o teste)
+
+    # Carrega histórico recente da sessão atual (se houver)
     chat_history = []
+    recent_messages = load_history(session_id, limit=5)
+    for user_msg, ai_msg in reversed(recent_messages):  # Reverse para ordem cronológica
+        chat_history.append(HumanMessage(content=user_msg))
+        chat_history.append(AIMessage(content=ai_msg))
 
     # Mapeamento de ferramentas disponíveis para execução manual pelo código
     available_tools = {"escalate_to_human": escalate_to_human}
@@ -80,6 +131,9 @@ def main():
 
             # Mantém a resposta final no histórico para continuidade da conversa
             chat_history.append(AIMessage(content=final_text))
+
+            # Salva a troca no banco de dados persistente
+            save_to_history(session_id, user_input, final_text)
 
         except Exception as e:
             logger.error(f"Ocorreu um erro inesperado: {e}")
