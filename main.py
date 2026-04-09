@@ -1,54 +1,89 @@
-from langchain_core.messages import HumanMessage, AIMessage
-
+import logging
+from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 from agent import build_agent
+from tools import escalate_to_human
 
+# 1. Configuração de Logs
+# Definimos o nível WARNING para httpx para esconder as requisições POST do Google
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logger = logging.getLogger("LojaIA")
 
-def _extract_text(content):
-    """Extract text from AI message content, handling both plain strings
-    and Gemini's list of content blocks."""
+def _format_ai_response(content):
+    """
+    Trata a resposta do Gemini para garantir que apenas o texto puro seja exibido,
+    removendo metadados ou estruturas de lista de blocos.
+    """
     if isinstance(content, str):
         return content
     if isinstance(content, list):
-        parts = []
-        for block in content:
-            if isinstance(block, dict):
-                parts.append(block.get("text", ""))
-            elif hasattr(block, "text"):
-                parts.append(block.text)
-        return "\n".join(p for p in parts if p)
+        # Filtra apenas a parte de texto dos blocos retornados
+        parts = [block.get("text", "") for block in content if isinstance(block, dict) and "text" in block]
+        # Caso os blocos sejam objetos do LangChain com atributo .text
+        if not parts:
+            parts = [block.text for block in content if hasattr(block, "text")]
+        return "\n".join(parts)
     return str(content)
 
-
 def main():
-    print("=== Assistente Virtual da Loja ===")
+    print("=== Assistente Virtual da Loja (Lia) ===")
     print("Digite 'sair' para encerrar.\n")
 
+    # Inicializa o agente configurado no agent.py
     agent = build_agent()
-    messages = []
+    
+    # Melhoria: Memória Persistente (Simulada via lista para o teste)
+    chat_history = []
+
+    # Mapeamento de ferramentas disponíveis para execução manual pelo código
+    available_tools = {"escalate_to_human": escalate_to_human}
 
     while True:
-        user_input = input("Você: ").strip()
-        if user_input.lower() in ("sair", "exit", "quit"):
-            print("Até mais!")
-            break
-        if not user_input:
-            continue
+        try:
+            user_input = input("Você: ").strip()
+            if user_input.lower() in ("sair", "exit", "quit"):
+                print("Até mais!")
+                break
+            if not user_input:
+                continue
 
-        messages.append(HumanMessage(content=user_input))
-        result = agent.invoke({"messages": messages})
+            # Adiciona a interação do usuário ao histórico de contexto
+            chat_history.append(HumanMessage(content=user_input))
 
-        # Extract the last AI message (skip HumanMessage, SystemMessage, ToolMessage)
-        ai_messages = [
-            m for m in result["messages"]
-            if isinstance(m, AIMessage)
-        ]
-        output = _extract_text(ai_messages[-1].content) if ai_messages else "Sem resposta."
-        print(f"\nAssistente: {output}")
+            # Primeira chamada ao agente
+            response = agent.invoke({"messages": chat_history})
+            
+            # Verificação de Tool Calling (Execução de Automação)
+            if response.tool_calls:
+                for tool_call in response.tool_calls:
+                    tool_name = tool_call["name"].lower()
+                    tool_args = tool_call["args"]
+                    
+                    if tool_name in available_tools:
+                        # Executa a ferramenta (dispara o print do Webhook no console)
+                        tool_func = available_tools[tool_name]
+                        tool_result = tool_func.invoke(tool_args)
+                        
+                        # Registra a intenção da IA e o resultado da ferramenta no histórico
+                        chat_history.append(response)
+                        chat_history.append(ToolMessage(
+                            tool_call_id=tool_call["id"],
+                            content=str(tool_result)
+                        ))
+                        
+                        # Nova chamada ao agente para que ele gere a resposta final baseada no sucesso da tool
+                        response = agent.invoke({"messages": chat_history})
 
-        # Append the AI response to history
-        if ai_messages:
-            messages.append(ai_messages[-1])
+            # Formata e exibe a resposta final limpa para o usuário
+            final_text = _format_ai_response(response.content)
+            print(f"\nAssistente: {final_text}\n")
 
+            # Mantém a resposta final no histórico para continuidade da conversa
+            chat_history.append(AIMessage(content=final_text))
+
+        except Exception as e:
+            logger.error(f"Ocorreu um erro inesperado: {e}")
+            print("\nAssistente: Desculpe, tive um problema técnico. Podemos tentar novamente?\n")
 
 if __name__ == "__main__":
     main()
