@@ -1,0 +1,4 @@
+  File "C:\Users\Josec\OneDrive\Área de Trabalho\Agente_IA-Loja\web_interface\web_main.py", line 6
+    print(f"DEBUG: root_dir = {os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), \"..\"))}")
+                                                                                                         ^
+SyntaxError: unexpected character after line continuation character

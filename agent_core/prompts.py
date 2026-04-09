@@ -1,5 +1,7 @@
-from knowledge_base import KNOWLEDGE_BASE
+# --- CORREÇÃO DE IMPORT (PACOTE AGENT_CORE) ---
+from agent_core.knowledge_base import KNOWLEDGE_BASE
 
+# Formata o texto da base de conhecimento para o Prompt
 _knowledge_text = "\n".join(
     f"- {v}" for v in KNOWLEDGE_BASE.values()
 )

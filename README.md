@@ -26,6 +26,10 @@ Assistente de IA conversacional para atendimento ao cliente, desenvolvido com **
 ├── prompts.py          # System Prompt, definições de Persona e regras de memória
 ├── tools.py            # Definição de ferramentas (Webhook de Escalonamento)
 ├── tests/              # Suíte de testes automatizados (Pytest)
+├── web_interface/      # Interface web com FastAPI para chat
+│   ├── main.py         # Aplicação FastAPI principal
+│   ├── static/         # Arquivos estáticos (CSS, JS, imagens)
+│   └── README.md       # Documentação da interface web
 ├── .env.example        # Template para chaves de API
 ├── .gitignore          # Proteção de arquivos sensíveis e binários
 └── RELATIVO_FINAL.md   # Relatório técnico consolidado
@@ -66,11 +70,25 @@ MODEL=gemini-1.5-flash
 TEMPERATURE=0.1
 ```
 
-### 3. Execução
+### 3. Execução da Interface CLI (Terminal)
 ```bash
 python main.py
 ```
 *Nota: Para testes de persistência, o `session_id` está fixado como `test-user` no `main.py`.*
+
+### 4. Execução da Interface Web (FASTAPI)
+```bash
+# Acesse o diretório da interface web
+cd web_interface
+
+# Execute a aplicação
+python main.py
+```
+*Alternativa com Uvicorn:*
+```bash
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+*Em seguida, acesse http://localhost:8000 no seu navegador*
 
 ---
 
@@ -90,7 +108,7 @@ pytest tests/ -v
 
 ## 🔮 Próximos Passos (Roadmap de Escala)
 O projeto foi desenhado para crescer sem refatoração profunda:
-1. **Fase Web**: Implementação de API com **FastAPI** (Próxima Sprint).
+1. **✅ Fase Web CONCLUÍDA**: Implementação de API com **FastAPI** disponível em `/web_interface`
 2. **Busca Semântica**: Integração com **ChromaDB** quando a base superar 30 artigos.
 3. **Multi-tenancy**: Gestão de sessões por `user_id` via cabeçalhos HTTP.
 
