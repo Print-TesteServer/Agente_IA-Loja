@@ -1,6 +1,6 @@
 # Assistente de Atendimento Inteligente — Loja IA
 
-Assistente de IA para atendimento de loja, construído com **LangChain** e **OpenAI GPT-4o-mini**.
+Assistente de IA para atendimento de loja, construído com **LangChain** e **Google Gemini 2.5 Flash**.
 
 ## Estrutura do Projeto
 
@@ -34,9 +34,10 @@ O `System Prompt` foi construído com três pilares:
 # 1. Instale as dependências
 pip install -r requirements.txt
 
-# 2. Configure sua chave da OpenAI
+# 2. Configure sua chave da Google
 cp .env.example .env
-# Edite .env e coloque sua chave OPENAI_API_KEY
+# Edite .env e coloque sua chave GOOGLE_API_KEY
+# Obtenha em: https://aistudio.google.com/apikey
 
 # 3. Execute
 python main.py

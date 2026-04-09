@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(dir:*)",
+      "mcp__ide__executeCode",
+      "Bash(pytest tests/ -v)",
+      "Bash(python -c \"print\\(''test''\\)\")"
     ]
   }
 }
