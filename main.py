@@ -73,8 +73,9 @@ def main():
     # Inicializa o banco de dados
     init_database()
 
-    # Gera um ID de sessão simples baseado na data/hora atual
-    session_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    # Gera um ID de sessão FIXO para testes de memória
+    # Em produção, seria baseado na data/hora atual ou dispositivo
+    session_id = "test-user"
 
     # Inicializa o agente configurado no agent.py
     agent = build_agent()
@@ -103,25 +104,25 @@ def main():
 
             # Primeira chamada ao agente
             response = agent.invoke({"messages": chat_history})
-            
+
             # Verificação de Tool Calling (Execução de Automação)
             if response.tool_calls:
                 for tool_call in response.tool_calls:
                     tool_name = tool_call["name"].lower()
                     tool_args = tool_call["args"]
-                    
+
                     if tool_name in available_tools:
                         # Executa a ferramenta (dispara o print do Webhook no console)
                         tool_func = available_tools[tool_name]
                         tool_result = tool_func.invoke(tool_args)
-                        
+
                         # Registra a intenção da IA e o resultado da ferramenta no histórico
                         chat_history.append(response)
                         chat_history.append(ToolMessage(
                             tool_call_id=tool_call["id"],
                             content=str(tool_result)
                         ))
-                        
+
                         # Nova chamada ao agente para que ele gere a resposta final baseada no sucesso da tool
                         response = agent.invoke({"messages": chat_history})
 

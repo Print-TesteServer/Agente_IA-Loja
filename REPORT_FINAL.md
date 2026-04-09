@@ -54,6 +54,8 @@ When knowledge_base grows beyond 20-30 articles:
 2. Se o usuário se identificou anteriormente (ex: "Meu nome é Matheus"), você DEVE usar essa informação para tratá-lo pelo nome em interações futuras, demonstrando continuidade e atenção.                                  
 3. Se o usuário perguntar "Qual é o meu nome?" e ele já tiver se identificado antes, responda cordialmente.                                                                                                                  
 4. Caso o histórico seja reiniciado e o usuário pergunte o nome sem ter se identificado nesta nova sessão, explique de forma empática que, por segurança e privacidade, você não tem acesso a dados pessoais externos, mas   que ele pode se identificar se desejar. - isso está implementado no agente?  
+- **Status**: IMPLEMENTADO.
+- **Evidência**: O `SYSTEM_PROMPT` agora contém instruções explícitas de reconhecimento de identidade e o `main.py` utiliza um identificador de sessão persistente no SQLite. O agente recupera o nome do usuário através do contexto histórico injetado no `MessagesPlaceholder`.
 
 ## 🏁 CONCLUSION
 The project is **fully implemented according to the suggested improvements roadmap**, with all requested functionalities working correctly and ready for immediate production use.

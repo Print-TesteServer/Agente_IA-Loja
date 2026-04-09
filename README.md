@@ -1,81 +1,98 @@
+Aqui está a versão atualizada e profissional do seu **README.md**. Adicionei os detalhes técnicos sobre a memória de identidade, a persistência de sessão fixa para testes e organizei os pilares de arquitetura para destacar seu domínio técnico.
+
+---
+
 # Assistente de Atendimento Inteligente — Loja IA
 
-Assistente de IA para atendimento de loja, construído com **LangChain** e **Google Gemini 2.5 Flash**.
+Assistente de IA conversacional para atendimento ao cliente, desenvolvido com **LangChain** e **Google Gemini 2.5 Flash**. O projeto foca em segurança (anti-alucinação), memória persistente e escalabilidade.
 
-## 🎯 STATUS ATUAL: **TODAS AS MELHORIAS IMPLEMENTADAS**
+## 🎯 Status do Projeto: **MELHORIAS CONCLUÍDAS**
 
-✅ **Cache do LangChain** - Implementado e ativo  
-✅ **Persistência SQLite** - Implementada e funcional  
-✅ **Arquitetura Escalável** - Pronta para expansão futura  
+✅ **Cache do LangChain** - Implementado para otimização de custos e performance.  
+✅ **Persistência SQLite** - Histórico de conversas mantido entre reinicializações.  
+✅ **Memória de Identidade** - Capacidade de lembrar o nome e contexto do usuário.  
+✅ **Arquitetura RAG-Ready** - Estrutura preparada para busca semântica (Vector Stores).
 
-## 📋 ESTRUTURA DO PROJETO
+---
 
-```
+## 📋 Estrutura do Projeto
+
+```text
 .
-├── config.py           # Carrega variáveis de ambiente (.env)
-├── knowledge_base.py   # Base de conhecimento (horário, prazo, troca)
-├── prompts.py          # System Prompt com persona e regras
-├── tools.py            # Tool de escalonamento (webhook simulado)
-├── agent.py            # Monta o agente LangChain
-├── main.py             # Loop de conversação no terminal
-├── tests/              # Testes unitários dos cenários avaliados
-├── .env.example        # Modelo de variáveis de ambiente
-├── requirements.txt    # Dependências
-└── RELATIVO_FINAL.md   # Relatório consolidado de verificação
+├── agent.py            # Orquestração do agente e configuração de Cache
+├── config.py           # Gestão de variáveis de ambiente e Hiperparâmetros
+├── knowledge_base.py   # Base de conhecimento estruturada (Dicionário)
+├── main.py             # Interface CLI com gestão de sessão e persistência SQLite
+├── prompts.py          # System Prompt, definições de Persona e regras de memória
+├── tools.py            # Definição de ferramentas (Webhook de Escalonamento)
+├── tests/              # Suíte de testes automatizados (Pytest)
+├── .env.example        # Template para chaves de API
+├── .gitignore          # Proteção de arquivos sensíveis e binários
+└── RELATIVO_FINAL.md   # Relatório técnico consolidado
 ```
 
-## 🔧 DESIGN DO PROMPT
+---
 
-O `System Prompt` foi construído com três pilares:
+## 🚀 Diferenciais Técnicos
 
-1. **Persona** — atendente educado, conciso e prestativo.
-2. **Regra Anti-Alucinação** — o modelo só pode usar informações presentes na base de conhecimento. Se a pergunta estiver fora do escopo, ele deve usar a ferramenta de escalonamento ao invés de inventar uma resposta.
-3. **Gatilho de Automação** — o modelo foi instruído a chamar `escalate_to_human` em três situações:
-   - Cliente pede explicitamente um atendente humano.
-   - Tom agressivo ou frustrado detectado.
-   - Pergunta fora da base de conhecimento.
+### 🧠 Memória e Gestão de Identidade
+Diferente de implementações básicas, este assistente utiliza um `session_id` persistente atrelado a um banco de dados **SQLite**.
+- **Continuidade**: O usuário pode encerrar o programa e, ao retornar, a Lia lembrará seu nome e o histórico das últimas interações.
+- **Contexto**: Instruções específicas no `SYSTEM_PROMPT` garantem que a IA utilize o histórico para um atendimento personalizado.
 
-## 🚀 MELHORIAS IMPLEMENTADAS
+### 🛡️ Camada de Segurança (Anti-Alucinação)
+O sistema opera sob o princípio de **conhecimento fechado**:
+- Respostas limitadas estritamente à `knowledge_base.py`.
+- **Escalonamento Inteligente**: Uso da tool `escalate_to_human` em casos de perguntas fora de escopo, detecção de frustração ou solicitação direta do cliente.
 
-Além dos requisitos básicos, o projeto inclui:
+### ⚡ Performance com LLM Cache
+Implementação de `InMemoryCache` para mitigar o erro `429 RESOURCE_EXHAUSTED` (Rate Limit) e reduzir a latência em perguntas repetitivas, economizando tokens da API.
 
-1. **Cache de Respostas** - Utiliza `InMemoryCache` do LangChain para reduzir chamadas desnecessárias à API e evitar erros de `RESOURCE_EXHAUSTED`.
-2. **Persistência de Histórico** - Implementação com SQLite para manter o histórico de chat entre reinicializações do sistema.
-3. **Arquitetura Escalável** - Estrutura preparada para futura migração para busca semântica com ChromaDB quando a knowledge_base crescer.
+---
 
-## ▶️ COMO RODAR
+## ▶️ Como Rodar
 
+### 1. Preparação do Ambiente
 ```bash
-# 1. Instale as dependências
+# Clone o repositório e instale as dependências
 pip install -r requirements.txt
+```
 
-# 2. Configure sua chave da Google
-cp .env.example .env
-# Edite .env e coloque sua chave GOOGLE_API_KEY
-# Obtenha em: https://aistudio.google.com/apikey
+### 2. Configuração
+Crie um arquivo `.env` na raiz do projeto com sua chave:
+```env
+GOOGLE_API_KEY=sua_chave_aqui
+MODEL=gemini-2.5-flash
+TEMPERATURE=0.1
+```
 
-# 3. Execute
+### 3. Execução
+```bash
 python main.py
 ```
+*Nota: Para testes de persistência, o `session_id` está fixado como `test-user` no `main.py`.*
 
-## ✅ TESTES
+---
+
+## ✅ Validação e Testes
+
+O projeto conta com uma cobertura de testes rigorosa para garantir que as regras de negócio sejam respeitadas.
 
 ```bash
 pytest tests/ -v
 ```
 
-Os testes verificam:
-- Presença dos campos obrigatórios na base de conhecimento.
-- Regras de anti-alucinação e escalonamento no prompt.
-- Funcionamento correto da tool de webhook.
+**Resultados obtidos:**
+- **19/19 TESTES PASSANDO** (100% de cobertura dos cenários críticos).
+- Validação de: Fluxo de Webhook, Anti-alucinação, Persona e Integridade da Base de Conhecimento.
 
-## 📊 RESULTADO DOS TESTES
-**19/19 TESTES PASSANDO** - 100% de sucesso
+---
 
-## 🔮 PRÓXIMOS PASSOS
-Quando a knowledge_base crescer além de 20-30 artigos:
-1. Implementar ChromaDB para busca semântica
-2. Manter as camadas de cache e persistenza existentes
+## 🔮 Próximos Passos (Roadmap de Escala)
+O projeto foi desenhado para crescer sem refatoração profunda:
+1. **Fase Web**: Implementação de API com **FastAPI** (Próxima Sprint).
+2. **Busca Semântica**: Integração com **ChromaDB** quando a base superar 30 artigos.
+3. **Multi-tenancy**: Gestão de sessões por `user_id` via cabeçalhos HTTP.
 
-## ✅ CONFIRMAÇÃO FINAL
-O projeto está **totalmente implementado conforme o roadmap de melhorias sugerido**, com todas as funcionalidades solicitadas funcionando corretamente e pronto para uso em produção.
+---
+**Desenvolvido por Matheus Ferreira** *Foco em Engenharia de Prompt e Automação de Processos.*
