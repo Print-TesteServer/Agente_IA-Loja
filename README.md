@@ -4,7 +4,7 @@ Aqui está a versão atualizada e profissional do seu **README.md**. Adicionei o
 
 # Assistente de Atendimento Inteligente — Loja IA
 
-Assistente de IA conversacional para atendimento ao cliente, desenvolvido com **LangChain** e **Google Gemini 2.5 Flash**. O projeto foca em segurança (anti-alucinação), memória persistente e escalabilidade.
+Assistente de IA conversacional para atendimento ao cliente, desenvolvido com **LangChain** e **Google Gemini 1.5 Flash**. O projeto foca em segurança (anti-alucinação), memória persistente e escalabilidade.
 
 ## 🎯 Status do Projeto: **MELHORIAS CONCLUÍDAS**
 
@@ -62,7 +62,7 @@ pip install -r requirements.txt
 Crie um arquivo `.env` na raiz do projeto com sua chave:
 ```env
 GOOGLE_API_KEY=sua_chave_aqui
-MODEL=gemini-2.5-flash
+MODEL=gemini-1.5-flash
 TEMPERATURE=0.1
 ```
 
