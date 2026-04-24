@@ -1,7 +1,3 @@
-Aqui está a versão atualizada e profissional do seu **README.md**. Adicionei os detalhes técnicos sobre a memória de identidade, a persistência de sessão fixa para testes e organizei os pilares de arquitetura para destacar seu domínio técnico.
-
----
-
 # Assistente de Atendimento Inteligente — Loja IA
 
 Assistente de IA conversacional para atendimento ao cliente, desenvolvido com **LangChain** e **Google Gemini 1.5 Flash**. O projeto foca em segurança (anti-alucinação), memória persistente e escalabilidade.
